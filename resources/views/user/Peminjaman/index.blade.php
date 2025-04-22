@@ -35,8 +35,8 @@
                     </div>
                 </div>
                 <div class="relative overflow-x-auto">
-                    <a href=""
-                        class="mx-3 mb-3 btn gap-x-2 bg-indigo-600 text-white border-indigo-600 disabled:opacity-50 disabled:pointer-events-none hover:bg-indigo-800 hover:border-indigo-800 active:bg-indigo-800 active:border-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300"">Form
+                <a href="{{ route('mahasiswa.peminjaman.create') }}"
+                        class="p-2 px-3 mb-3 mx-3 btn gap-x-2 bg-indigo-600 text-white border-indigo-600 disabled:opacity-50 disabled:pointer-events-none hover:bg-indigo-800 hover:border-indigo-800 active:bg-indigo-800 active:border-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300">Form
                         Pengajuan</a>
                     <table class="text-left w-full whitespace-nowrap">
                         <thead class="bg-gray-200 text-gray-700">
@@ -61,12 +61,42 @@
                                     <td class="px-6 py-3">{{ $item->fasilitas->nama_fasilitas ?? '_' }}</td>
                                     <td class="px-6 py-3">{{ $item->tanggal_mulai->format('d/m/Y') }}</td>
                                     <td class="px-6 py-3">{{ $item->tanggal_selesai->format('d/m/Y') }}</td>
-                                    <td class="px-6 py-3"></td>
-                                    <td class="px-6 py-3"></td>
+                                    <td class="px-6 py-3">{{ $item->keperluan }}</td>
                                     <td class="px-6 py-3">
+                                        @php
+                                            $status = $item->status ?? 'Menunggu';
+
+                                            $badgeClass = match ($status) {
+                                                'Diproses' => 'bg-yellow-100 text-yellow-900',
+                                                'Disetujui' => 'bg-teal-100 text-teal-900',
+                                                'Ditolak' => 'bg-red-100 text-red-900',
+                                                'Menunggu' => 'bg-blue-200 text-blue-700',
+                                                'Batal' => 'bg-gray-300 text-gray-900',
+                                                default => 'bg-gray-100 text-gray-900',
+                                            };
+                                        @endphp
+
                                         <span
-                                            class="bg-green-100 px-2 py-1 text-green-900 text-sm font-medium rounded-md inline-block whitespace-nowrap text-center">Active</span>
+                                            class="px-2 py-1 text-sm font-medium rounded-md inline-block whitespace-nowrap text-center {{ $badgeClass }}">
+                                            {{ ucfirst($status) }}
+                                        </span>
                                     </td>
+                                    <td class="px-6 py-3">{{ $item->biaya }}</td>
+                                    <td class="px-6 py-3">
+                                        @php
+                                            $isAktifClass = $item->is_aktif
+                                                ? 'bg-red-100 text-red-900'
+                                                : 'bg-teal-100 text-teal-900';
+                                            $isAktifLabel = $item->is_aktif ? 'Belum Bayar' : 'Sudah Bayar';
+                                        @endphp
+
+                                        <span
+                                            class="px-2 py-1 text-sm font-medium rounded-md inline-block whitespace-nowrap text-center {{ $isAktifClass }}">
+                                            {{ $isAktifLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3">{{ $item->approvedBy ?? '_' }}</td>
+                                    <td class="px-6 py-3">{{ $item->catatan }}</td>
                                     <td class="action_info px-6 py-3 flex items-center gap-1 mt-2">
                                         <a href="#!"
                                             class="btn rounded-full h-8 w-8 flex items-center gap-x-2 bg-transparent text-gray-600 border-transparent border disabled:opacity-50 disabled:pointer-events-none hover:text-gray-800 hover:bg-gray-300 hover:border-gray-300 active:bg-gray-300 active:border-gray-300 active:text-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 btn-sm texttooltip"
@@ -76,7 +106,7 @@
                                                 <span>View</span>
                                             </div>
                                         </a>
-                                        <a href="#!"
+                                        <a href="{{ route('mahasiswa.peminjaman.edit', $item->id) }}"
                                             class="btn rounded-full h-8 w-8 flex items-center gap-x-2 bg-transparent text-gray-600 border-transparent border disabled:opacity-50 disabled:pointer-events-none hover:text-gray-800 hover:bg-gray-300 hover:border-gray-300 active:bg-gray-300 active:border-gray-300 active:text-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 btn-sm texttooltip"
                                             data-template="editOne">
                                             <i data-feather="edit"></i>
@@ -84,7 +114,7 @@
                                                 <span>Edit</span>
                                             </div>
                                         </a>
-                                        <a href="#!"
+                                        <a href="{{ route('mahasiswa.peminjaman.destroy', $item->id) }}"
                                             class="btn rounded-full h-8 w-8 flex items-center gap-x-2 bg-transparent text-gray-600 border-transparent border disabled:opacity-50 disabled:pointer-events-none hover:text-gray-800 hover:bg-gray-300 hover:border-gray-300 active:bg-gray-300 active:border-gray-300 active:text-gray-800 focus:outline-none focus:ring-4 focus:ring-gray-300 btn-sm texttooltip"
                                             data-template="trashOne">
                                             <i data-feather="trash-2"></i>

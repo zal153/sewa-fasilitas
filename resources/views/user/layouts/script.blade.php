@@ -1,3 +1,8 @@
+<!-- popper js -->
+<script src="{{ asset('') }}asset/libs/%40popperjs/core/dist/umd/popper.min.js"></script>
+<!-- tippy js -->
+<script src="{{ asset('') }}asset/libs/tippy.js/dist/tippy-bundle.umd.min.js"></script>
+<script src="{{ asset('') }}asset/js/vendors/tooltip.js"></script>
 <script src="{{ asset('') }}asset/libs/apexcharts/dist/apexcharts.min.js"></script>
 <script src="{{ asset('') }}asset/js/vendors/chart.js"></script>
 <!-- Libs JS -->
@@ -7,3 +12,5 @@
 
 <!-- Theme JS -->
 <script src="{{ asset('') }}asset/js/theme.min.js"></script>
+<script src="{{ asset('') }}asset/js/theme.min.js"></script>
+<script src="{{ asset('') }}asset/libs/list.js/dist/list.min.js"></script>
