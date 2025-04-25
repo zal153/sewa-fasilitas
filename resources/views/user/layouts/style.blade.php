@@ -2,7 +2,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<link rel="shortcut icon" type="image/x-icon" href="{{ asset('') }}asset/images/favicon/favicon.ico" />
+<link rel="shortcut icon" type="image/x-icon" href="{{ asset('') }}asset/images/brand/logo/logo.png" />
 
 <!-- Libs CSS -->
 <link rel="preconnect" href="https://fonts.googleapis.com/" />

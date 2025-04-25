@@ -17,7 +17,7 @@
                                 <span
                                     class="select-none hidden md:inline-block animate-hand-wave origin-[70%_70%]">👋</span><br>
                             </span>
-                            Admin
+                            {{ auth()->user()->name }}
                         </h1>
                         {{-- <a href="#" class="btn b-solid btn-primary-solid btn-lg mt-6 dk-theme-card-square">
                             <i class="ri-add-line text-inherit"></i>

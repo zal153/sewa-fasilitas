@@ -95,4 +95,19 @@ class User extends Authenticatable
     {
         return $this->hasOne(Staff::class);
     }
+
+    public function peminjaman()
+    {
+        return $this->hasMany(PeminjamanFasilitas::class);
+    }
+
+    public function approvedPeminjaman()
+    {
+        return $this->peminjaman()->where('status', 'disetujui');
+    }
+
+    public function rejectedPeminjaman()
+    {
+        return $this->peminjaman()->where('status', 'ditolak');
+    }
 }

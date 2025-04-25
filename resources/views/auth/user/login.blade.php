@@ -7,9 +7,9 @@
         <!-- Logo dan Info -->
         <div class="mb-4 text-center">
             <a href="{{ url('/') }}">
-                <img src="{{ asset('asset/images/brand/logo/logo-primary.svg') }}" class="mb-1 mx-auto" alt="Logo" />
+                <img src="{{ asset('asset/images/brand/logo/logo_unibamadura.png') }}" class="mb-1 mx-auto" alt="Logo" />
             </a>
-            <p class="text-gray-600">Please enter your user information.</p>
+            <p class="text-gray-600">Silahkan Login Terlebih Dahulu</p>
         </div>
 
         <!-- Form -->
@@ -22,7 +22,7 @@
                 <label for="email" class="block text-gray-800 font-semibold mb-2">Email</label>
                 <input type="email" id="email" name="email" value="{{ old('email') }}"
                     class="w-full p-2 px-3 border border-gray-300 text-gray-900 rounded-md focus:ring-indigo-600 focus:border-indigo-600"
-                    placeholder="Email address here" required autofocus>
+                    placeholder="Email" required autofocus>
                 @error('email')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror
@@ -33,7 +33,7 @@
                 <label for="password" class="block text-gray-800 font-semibold mb-2">Password</label>
                 <input type="password" id="password" name="password"
                     class="w-full p-2 px-3 border border-gray-300 text-gray-900 rounded-md focus:ring-indigo-600 focus:border-indigo-600"
-                    placeholder="**************" required>
+                    placeholder="Password" required>
                 @error('password')
                     <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                 @enderror

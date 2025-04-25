@@ -183,7 +183,7 @@
                     fill="currentColor" />
             </svg>
         </a>
-        <form id="logout-form" action="#" method="POST" class="hidden">
+        <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" class="hidden">
             @csrf
         </form>
     </div>

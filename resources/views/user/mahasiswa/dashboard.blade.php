@@ -4,7 +4,7 @@
 @section('contentUser')
     <div class="pb-20">
         <div class="bg-indigo-600 px-8 pt-8 pb-24 flex justify-between items-center mb-4">
-            <h1 class="text-xl text-white">Selamat Datang <span> User</span></h1>
+            <h1 class="text-xl text-white">Selamat Datang <span> {{ auth()->user()->name }}</span></h1>
         </div>
         <div class="-mt-24 mx-6 mb-6 grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2 xl:grid-cols-4">
             <!-- card -->

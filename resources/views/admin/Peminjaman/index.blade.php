@@ -50,9 +50,12 @@
                                             Selesai</th>
                                         <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">keperluan</th>
                                         <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Status</th>
+                                        @if ($adaNonMahasiswa)
                                         <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Biaya</th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Pembayaran
-                                        </th>
+                                            <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">
+                                                Pembayaran
+                                            </th>
+                                        @endif
                                         <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Disetujui Oleh
                                         </th>
                                         <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Catatan</th>
@@ -91,13 +94,14 @@
                                                     {{ ucfirst($status) }}
                                                 </span>
                                             </td>
-                                            <td class="p-6 py-4 dk-border-one">{{ $item->biaya }}</td>
-                                            <td class="p-6 py-4 dk-border-one">
-                                                <span
-                                                    class="{{ $item->is_aktif ? 'badge badge-danger-light rounded-full' : 'badge badge-success-light rounded-full' }}">
-                                                    {{ $item->is_aktif ? 'Belum Bayar' : 'Sudah Bayar' }}
-                                                </span>
-                                            </td>
+                                            @if ($adaNonMahasiswa)
+                                                <td class="p-6 py-4 dk-border-one">
+                                                    <span
+                                                        class="{{ $item->is_aktif ? 'badge badge-danger-light rounded-full' : 'badge badge-success-light rounded-full' }}">
+                                                        {{ $item->is_aktif ? 'Belum Bayar' : 'Sudah Bayar' }}
+                                                    </span>
+                                                </td>
+                                            @endif
                                             <td class="p-6 py-4 dk-border-one">{{ $item->approvedBy->name ?? '-' }}</td>
                                             <td class="p-6 py-4 dk-border-one">{{ $item->catatan }}</td>
                                             <td class="p-6 py-4 dk-border-one">
@@ -106,6 +110,18 @@
                                                         class="btn-icon btn-primary-icon-light size-7">
                                                         <i class="ri-edit-2-line text-inherit text-[13px]"></i>
                                                     </a>
+                                                    @if ($item->status == 'diajukan')
+                                                        <form action="{{ route('peminjaman.approve', $item->id) }}"
+                                                            method="POST"
+                                                            onsubmit="return confirm('Yakin ingin menyetujui peminjaman ini?')">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <button type="submit"
+                                                                class="btn-icon btn-success-icon-light size-7">
+                                                                <i class="ri-check-line text-inherit text-[13px]"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                     <form action="{{ route('peminjaman.destroy', $item->id) }}"
                                                         method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
                                                         @csrf
@@ -117,6 +133,7 @@
                                                     </form>
                                                 </div>
                                             </td>
+
                                         </tr>
                                     @empty
                                         <tr>

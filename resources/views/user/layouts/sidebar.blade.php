@@ -1,8 +1,8 @@
 <nav class="navbar-vertical navbar">
     <div id="myScrollableElement" class="h-screen" data-simplebar>
         <!-- brand logo -->
-        <a class="navbar-brand" href="index.html">
-            <img src="{{ asset('') }}asset/images/brand/logo/logo.svg" alt="" />
+        <a class="navbar-brand" href="{{ route('mahasiswa.dashboard') }}">
+            <img src="{{ asset('') }}asset/images/brand/logo/logo_unibamadura.png" alt="" />
         </a>
 
         <!-- navbar nav -->
@@ -36,15 +36,22 @@
             </li>
             <!-- Nav item -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#!" data-bs-target="#navEmail" aria-expanded="false"
+                <a class="nav-link collapsed" href="{{ route('mahasiswa.riwayat') }}" data-bs-target="#navEmail" aria-expanded="false"
                     aria-controls="navEmail">
                     <i data-feather="mail" class="w-4 h-4 mr-2"></i>
                     Riwayat Peminjaman
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-bs-target="#navEmail" aria-expanded="false"
+                    aria-controls="navEmail">
+                    <i data-feather="mail" class="w-4 h-4 mr-2"></i>
+                    Pembayaran
+                </a>
+            </li>
             <!-- Nav item -->
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#!" data-bs-target="#navKanban" aria-expanded="false"
+                <a class="nav-link collapsed" href="{{ route('mahasiswa.profil') }}" data-bs-target="#navKanban" aria-expanded="false"
                     aria-controls="navKanban">
                     <i data-feather="user" class="w-4 h-4 mr-2"></i>
                     Profil Saya
@@ -57,7 +64,7 @@
                     <i data-feather="log-out" class="w-4 h-4 mr-2"></i>
                     Logout
                 </a>
-                <form id="logout-form" action="#" method="POST" class="hidden">
+                <form id="logout-form" action="{{ route('user.logout') }}" method="POST" class="hidden">
                     @csrf
                 </form>
             </li>

@@ -2,7 +2,7 @@
     <div>
         <p class="m-0 leading-6">
             Made by
-            <a href="#" target="_blank" class="text-indigo-600">Codescandy</a>
+            <a href="#" target="_blank" class="text-indigo-600">Team 2</a>
         </p>
         <a href="#" target="_blank">
             <svg viewBox="0 0 24 24" aria-hidden="true" class="h-6 w-6 fill-gray-800">

@@ -94,16 +94,16 @@
                     <img src="{{ asset('') }}assets/images/user/profile-img.png" alt="user-img"
                         class="size-7 sm:size-9 rounded-50 dk-theme-card-square">
                     <span
-                        class="font-semibold leading-none text-lg capitalize hidden sm:block">#</span>
+                        class="font-semibold leading-none text-lg capitalize hidden sm:block">{{ auth()->user()->name }}</span>
                 </button>
                 <!-- Dropdown menu -->
                 <div id="dropdownProfile"
                     class="invisible z-backdrop bg-white text-left divide-y divide-gray-100 rounded-lg shadow w-48 dark:bg-dark-card-shade dark:divide-dark-border-four">
                     <div class="px-4 py-3 text-sm text-gray-500 dark:text-white">
-                        <div class="font-medium ">#</div>
+                        <div class="font-medium ">{{ auth()->user()->name }}</div>
                         <div class="truncate">
-                            <a href="mailto:#">
-                                {{-- {{ auth()->user()->email }} --}}
+                            <a href="mailto:{{ auth()->user()->email }}">
+                                {{ auth()->user()->email }}
                             </a>
                         </div>
                     </div>

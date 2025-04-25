@@ -11,6 +11,6 @@
 <script src="{{ asset('') }}asset/libs/simplebar/dist/simplebar.min.js"></script>
 
 <!-- Theme JS -->
-<script src="{{ asset('') }}asset/js/theme.min.js"></script>
+{{-- <script src="{{ asset('') }}asset/js/theme.min.js"></script> --}}
 <script src="{{ asset('') }}asset/js/theme.min.js"></script>
 <script src="{{ asset('') }}asset/libs/list.js/dist/list.min.js"></script>
