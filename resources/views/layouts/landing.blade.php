@@ -43,13 +43,8 @@
 
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="index.html">Home<br></a></li>
-                    <li><a href="about.html">Tentang Kami</a></li>
-                    <li><a href="courses.html">Fasilitas</a></li>
-                    <li><a href="trainers.html">Cara Sewa</a></li>
-                    <li><a href="events.html">Testimoni</a></li>
-                    {{-- <li><a href="pricing.html">Pricing</a></li> --}}
-                    <li><a href="contact.html">Kontak</a></li>
+                    {{-- <li><a href="/">Home<br></a></li> --}}
+
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>

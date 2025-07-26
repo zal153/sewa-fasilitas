@@ -2,112 +2,168 @@
 @section('title', 'Riwayat Peminjaman')
 
 @section('contentUser')
-    <div class="px-6 pt-6 pb-20">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-xl font-semibold">Riwayat Peminjaman</h1>
+    <div class="container-xxl flex-grow-1 container-p-y">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">Riwayat Peminjaman</h4>
         </div>
 
-        {{-- Search & Per Page Filter --}}
-        <form method="GET" id="perPageForm"
-            class="btn-toolbar border-b border-gray-300 px-5 py-3 flex flex-col lg:flex-row lg:justify-between lg:items-center mb-4 gap-3">
-            <!-- Search Bar -->
-            <div class="flex">
-                <label
-                    class="leading-[1.7] p-2 px-3 border flex items-center justify-center bg-gray-200 border-gray-300 rounded-l-md">Search</label>
-                <input type="search" name="search"
-                    class="border border-l-0 border-gray-300 text-gray-900 rounded-r-md focus:ring-indigo-600 focus:border-indigo-600 block w-full p-2 px-3 disabled:opacity-50 disabled:pointer-events-none"
-                    value="{{ request('search') }}" placeholder="Search..." />
+        {{-- Flash Messages --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>Berhasil!</strong> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <!-- Show Items per Page -->
-            <div class="lg:ml-auto flex items-center">
-                <label
-                    class="leading-[1.7] p-2 px-3 border border-r-0 flex items-center justify-center bg-gray-200 border-gray-300 rounded-l-md">Show</label>
-                <select name="per_page" onchange="document.getElementById('perPageForm').submit()"
-                    class="text-base py-2 px-4 block w-40 border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 disabled:opacity-50 disabled:pointer-events-none">
-                    <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
-                    <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
-                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
-                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
-                </select>
-                <label
-                    class="leading-[1.7] p-2 px-3 border border-l-0 flex items-center justify-center bg-gray-200 border-gray-300 rounded-r-md">items</label>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Gagal!</strong> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        <!-- Filter & Search -->
+        <form method="GET" id="perPageForm" class="row mb-4 g-3 align-items-center">
+            <!-- Search -->
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">Search</span>
+                    <input type="search" name="search" value="{{ request('search') }}" class="form-control"
+                        placeholder="Cari...">
+                </div>
+            </div>
+
+            <!-- Per Page -->
+            <div class="col-md-3 ms-auto">
+                <div class="input-group">
+                    <label class="input-group-text">Tampilkan</label>
+                    <select name="per_page" class="form-select" onchange="document.getElementById('perPageForm').submit()">
+                        <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                        <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                    </select>
+                    <span class="input-group-text">item</span>
+                </div>
             </div>
         </form>
 
+        <!-- Table Card -->
+        <div class="card">
+            <h5 class="card-header">Data Riwayat Peminjaman</h5>
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr class="text-nowrap">
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Fasilitas</th>
+                            <th>Tgl Mulai</th>
+                            <th>Tgl Selesai</th>
+                            <th>Keperluan</th>
+                            <th>Status</th>
+                            @if ($adaNonMahasiswa)
+                                <th>Biaya</th>
+                                <th>Pembayaran</th>
+                            @endif
+                            <th>Disetujui Oleh</th>
+                            <th>Catatan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($peminjaman as $item)
+                            <tr>
+                                <td>{{ $no++ }}</td>
+                                <td>{{ $item->user->name ?? '_' }}</td>
+                                <td>{{ $item->fasilitas->nama_fasilitas ?? '_' }}</td>
+                                <td>{{ $item->tanggal_mulai->format('d/m/Y') }}</td>
+                                <td>{{ $item->tanggal_selesai->format('d/m/Y') }}</td>
+                                <td>{{ $item->keperluan }}</td>
+                                <td>
+                                    @php
+                                        $status = $item->status ?? 'diajukan';
+                                        $badgeClass = match ($status) {
+                                            'diproses' => 'bg-secondary',
+                                            'disetujui' => 'bg-success',
+                                            'ditolak' => 'bg-danger',
+                                            'diajukan' => 'bg-warning text-dark',
+                                            default => 'bg-info',
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">{{ ucfirst($status) }}</span>
+                                </td>
 
-        {{-- Tabel Riwayat --}}
-        <div class="overflow-x-auto bg-white shadow-md rounded-md">
-            <table class="w-full text-sm text-left">
-                <thead class="bg-gray-100 text-gray-700">
-                    <tr>
-                        <th class="px-6 py-3">No.</th>
-                        <th class="px-6 py-3">Nama</th>
-                        <th class="px-6 py-3">Fasilitas</th>
-                        <th class="px-6 py-3">Tgl Mulai</th>
-                        <th class="px-6 py-3">Tgl Selesai</th>
-                        <th class="px-6 py-3">Keperluan</th>
-                        <th class="px-6 py-3">Status</th>
-                        <th class="px-6 py-3">Biaya</th>
-                        <th class="px-6 py-3">Pembayaran</th>
-                        <th class="px-6 py-3">Disetujui Oleh</th>
-                        <th class="px-6 py-3">Catatan</th>
-                    </tr>
-                </thead>
-                <tbody class="list">
-                    @forelse ($peminjaman as $item)
-                        <tr class="border-t">
-                            <td class="px-6 py-3">{{ $no++ }}</td>
-                            <td class="px-6 py-3">{{ $item->user->name ?? '_' }}</td>
-                            <td class="px-6 py-3">{{ $item->fasilitas->nama_fasilitas ?? '_' }}</td>
-                            <td class="px-6 py-3">{{ $item->tanggal_mulai->format('d/m/Y') }}</td>
-                            <td class="px-6 py-3">{{ $item->tanggal_selesai->format('d/m/Y') }}</td>
-                            <td class="px-6 py-3">{{ $item->keperluan }}</td>
-                            <td class="px-6 py-3">{{ $item->biaya }}</td>
-                            <td class="px-6 py-3">
-                                @php
-                                    $pembayaranClass = $item->is_aktif
-                                        ? 'bg-red-100 text-red-800'
-                                        : 'bg-green-100 text-green-800';
-                                @endphp
-                                <span class="px-2 py-1 rounded text-xs font-medium {{ $pembayaranClass }}">
-                                    {{ $item->is_aktif ? 'Belum Bayar' : 'Sudah Bayar' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3">
-                                @php
-                                    $status = $item->status ?? 'Menunggu';
-                                    $badgeClass = match ($status) {
-                                        'Diproses' => 'bg-yellow-100 text-yellow-800',
-                                        'Disetujui' => 'bg-green-100 text-green-800',
-                                        'Ditolak' => 'bg-red-100 text-red-800',
-                                        'Menunggu' => 'bg-blue-100 text-blue-800',
-                                        default => 'bg-gray-100 text-gray-800',
-                                    };
-                                @endphp
-                                <span class="px-2 py-1 rounded text-xs font-medium {{ $badgeClass }}">
-                                    {{ ucfirst($status) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-3">{{ $item->approvedBy->name ?? 'Belum Disetujui' }}</td>
-                            <td class="px-6 py-3">{{ $item->catatan }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="11" class="text-center px-6 py-4 text-gray-400">Belum ada data peminjaman 😴</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                                @if ($adaNonMahasiswa)
+                                    <td>Rp {{ number_format($item->biaya, 0, ',', '.') }}</td>
+                                    <td>
+                                        @if ($item->is_aktif)
+                                            <span class="badge bg-danger">Belum Bayar</span>
+                                        @else
+                                            <span class="badge bg-success">Sudah Bayar</span>
+                                        @endif
+                                    </td>
+                                @endif
+
+                                <td>{{ $item->approvedBy->name ?? 'Belum Disetujui' }}</td>
+                                <td>{{ $item->catatan }}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        @if ($item->status === 'disetujui')
+                                            <a href="{{ route('mahasiswa.riwayat.print', $item->id) }}"
+                                                class="btn btn-sm btn-warning" target="_blank" title="Cetak Surat">
+                                                <i class="bx bx-printer"></i>
+                                            </a>
+                                        @else
+                                            <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                title="Surat hanya dapat dicetak setelah peminjaman disetujui">
+                                                <button type="button" class="btn btn-sm btn-secondary" disabled>
+                                                    <i class="bx bx-printer"></i>
+                                                </button>
+                                            </span>
+                                        @endif
+
+                                        <form action="{{ route('mahasiswa.riwayat.delete', $item->id) }}" method="POST"
+                                            onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="12" class="text-center text-muted">Belum ada data peminjaman 😴</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        {{-- Pagination --}}
-        <div class="flex justify-between items-center mt-6">
-            <div class="text-sm text-gray-600">
-                Menampilkan {{ $start }} sampai {{ $end }} dari total {{ $peminjaman->total() }} data
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <div class="text-muted small">
+                Menampilkan {{ $start }} sampai {{ $end }} dari {{ $peminjaman->total() }} data
             </div>
-            <div class="flex gap-2">
+            <div>
                 {{ $peminjaman->links() }}
             </div>
         </div>
+
     </div>
+
+    @push('scripts')
+        <script>
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        </script>
+    @endpush
 @endsection

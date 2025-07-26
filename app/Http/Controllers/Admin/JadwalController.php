@@ -18,8 +18,15 @@ class JadwalController extends Controller
         $data = JadwalFasilitas::paginate(10);
         $jadwal = JadwalFasilitas::all();
         $fasilitas = Fasilitas::all();
+
+        $tanggal = JadwalFasilitas::with('fasilitas')->get()->map(function ($item) {
+            $item->waktu_mulai = Carbon::parse($item->waktu_mulai)->format('d-m-Y H:i');
+            $item->waktu_selesai = Carbon::parse($item->waktu_selesai)->format('d-m-Y H:i');
+            return $item;
+        });
+        
         $no = 1;
-        return view('admin.jadwal.index', compact('jadwal', 'fasilitas', 'no', 'data'));
+        return view('admin.jadwal.index', compact('jadwal', 'fasilitas', 'no', 'data', 'tanggal'));
     }
 
     /**

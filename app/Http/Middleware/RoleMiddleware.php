@@ -14,22 +14,12 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next, $role)
     {
-        if (Auth::check()) {
-            if (is_array($roles)) {
-                foreach ($roles as $role) {
-                    if (Auth::user()->role === $role) {
-                        return $next($request);
-                    }
-                }
-            }
-            // Jika hanya satu role (misal: role:admin)
-            else if (Auth::user()->role === $roles[0]) {
-                return $next($request);
-            }
+        if (!Auth::check() || Auth::user()->role !== $role) {
+            abort(403, 'Unauthorized');
         }
 
-        abort(403, 'Unauthorized');
+        return $next($request);
     }
 }

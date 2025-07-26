@@ -34,6 +34,11 @@ class PeminjamanFasilitas extends Model
         'is_bayar' => 'boolean',
     ];
 
+    public function pembayaran()
+    {
+        return $this->hasOne(PembayaranFasilitas::class, 'peminjaman_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

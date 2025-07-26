@@ -9,6 +9,9 @@ class Mahasiswa extends Model
 {
     use HasFactory;
 
+    protected $table = 'mahasiswa';
+    public $timestamps = false;
+
     protected $fillable = [
         'user_id',
         'nim',

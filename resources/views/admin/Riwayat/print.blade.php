@@ -113,7 +113,7 @@
         </div>
         <div class="footer">
             <p>Dicetak pada: {{ now()->format('d M Y H:i') }}</p>
-            <p>&copy; 2025, Sistem Peminjaman Fasilitas</p>
+            <p>&copy; 2025, Universitas Bahaudin Mudhary</p> 
         </div>
     </div>
 </body>

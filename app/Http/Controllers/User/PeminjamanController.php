@@ -4,24 +4,36 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fasilitas;
-Use App\Models\PeminjamanFasilitas;
-use Illuminate\Support\Facades\DB;
+use App\Models\PeminjamanFasilitas;
+use App\Services\NotificationService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
     public function index()
     {
         $fasilitas = Fasilitas::all();
-        $no = 1;
-        $data = Fasilitas::paginate(10);
-        return view('user.peminjaman.index', compact('fasilitas', 'no', 'data'));
+
+        foreach ($fasilitas as $fasilitasItem) {
+            $fasilitasItem->kondisi = $fasilitasItem->tersedia() ? 'true' : 'false';
+        }
+
+        $peminjaman = PeminjamanFasilitas::all();
+        $adaNonMahasiswa = $peminjaman->contains(fn($item) => $item->user->role === 'non_mahasiswa');
+
+        return view('user.Peminjaman.index', compact('fasilitas', 'adaNonMahasiswa'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $fasilitas = Fasilitas::all();
-        return view('user.peminjaman.create', compact('fasilitas'));
+        $peminjaman = PeminjamanFasilitas::all();
+        $fasilitas_id = $request->fasilitas_id;
+        $fasilitas_pilih = Fasilitas::find($fasilitas_id);
+        return view('user.Peminjaman.create', compact('fasilitas', 'peminjaman', 'fasilitas_pilih'));
     }
 
     public function store(Request $request)
@@ -40,7 +52,7 @@ class PeminjamanController extends Controller
 
         PeminjamanFasilitas::create([
             'kode_peminjaman' => $kode,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'fasilitas_id' => $request->fasilitas_id,
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_selesai' => $request->tanggal_selesai,
@@ -55,7 +67,7 @@ class PeminjamanController extends Controller
     public function edit($id)
     {
         $peminjaman = PeminjamanFasilitas::findOrFail($id);
-        return view('user.peminjaman.edit', compact('peminjaman'));
+        return view('user.Peminjaman.edit', compact('peminjaman'));
     }
     public function update(Request $request, $id)
     {
@@ -84,5 +96,17 @@ class PeminjamanController extends Controller
         $peminjaman->delete();
 
         return redirect()->route('mahasiswa.peminjaman')->with('success', 'Peminjaman berhasil dihapus!');
+    }
+
+    // Ketika peminjaman disetujui
+    public function approve($id)
+    {
+        $peminjaman = PeminjamanFasilitas::findOrFail($id);
+        $peminjaman->update(['status' => 'disetujui']);
+
+        // Kirim notifikasi
+        NotificationService::sendPeminjamanDisetujui($peminjaman);
+
+        return redirect()->back()->with('success', 'Peminjaman berhasil disetujui!');
     }
 }

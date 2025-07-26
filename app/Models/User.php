@@ -110,4 +110,17 @@ class User extends Authenticatable
     {
         return $this->peminjaman()->where('status', 'ditolak');
     }
+
+    public function getUnreadNotificationsCount()
+    {
+        return $this->unreadNotifications()->count();
+    }
+
+    public function getRecentNotifications($limit = 10)
+    {
+        return $this->notifications()
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }

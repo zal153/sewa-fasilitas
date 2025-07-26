@@ -1,5 +1,4 @@
-{{-- @include('admin.layouts.style') --}}
-    <h2 class="text-lg font-bold mb-4">Detail Riwayat Peminjaman</h2>
+  <h2 class="text-lg font-bold mb-4">Detail Riwayat Peminjaman</h2>
     <div class="space-y-2 text-sm">
         <p><strong>Kode Peminjaman:</strong> {{ $riwayat->kode_peminjaman }}</p>
         <p><strong>Nama Peminjam:</strong> {{ $riwayat->user->name ?? '-' }}</p>
@@ -21,4 +20,3 @@
             <i class="ri-close-line text-inherit"></i> Tutup
         </button>
     </div>
-{{-- @include('admin.layouts.script') --}}

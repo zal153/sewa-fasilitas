@@ -27,8 +27,8 @@ class LoginController extends Controller
 
             if ($user->isMahasiswa()) {
                 return redirect()->route('mahasiswa.dashboard');
-            } elseif ($user->isDosen()) {
-                return redirect()->route('dosen.dashboard');
+            } elseif ($user->isNonMahasiswa()) {
+                return redirect()->route('non_mahasiswa.dashboard');
             }
             return redirect()->intended('/dashboard');
         }

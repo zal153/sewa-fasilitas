@@ -11,27 +11,54 @@ use Illuminate\Http\Request;
 
 class RiwayatController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = PeminjamanFasilitas::paginate(10);
-        $user = User::all();
-        $fasilitas = Fasilitas::all();
-        $riwayat = PeminjamanFasilitas::all();
-        $adaNonMahasiswa = $riwayat->contains(fn($item) => $item->user->role === 'non-mahasiswa');
-        $no = 1;
-        return view('admin.riwayat.index', compact('data', 'adaNonMahasiswa', 'no', 'riwayat', 'user', 'fasilitas'));
+        $query = PeminjamanFasilitas::with(['user', 'fasilitas', 'approvedBy']);
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter berdasarkan tanggal
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('tanggal_mulai', '>=', $request->tanggal_mulai);
+        }
+
+        if ($request->filled('tanggal_selesai')) {
+            $query->whereDate('tanggal_selesai', '<=', $request->tanggal_selesai);
+        }
+
+        // Gunakan paginate() untuk mendapatkan pagination
+        $riwayat = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        // Statistics
+        $stats = [
+            'total' => PeminjamanFasilitas::count(),
+            'menunggu' => PeminjamanFasilitas::where('status', 'Menunggu')->count(),
+            'disetujui' => PeminjamanFasilitas::where('status', 'Disetujui')->count(),
+            'ditolak' => PeminjamanFasilitas::where('status', 'Ditolak')->count(),
+        ];
+
+        $adaNonMahasiswa = PeminjamanFasilitas::whereHas('user', function ($q) {
+            $q->where('role', '!=', 'mahasiswa');
+        })->exists();
+
+        $no = ($riwayat->currentPage() - 1) * $riwayat->perPage() + 1;
+
+        return view('admin.Riwayat.index', compact('riwayat', 'stats', 'adaNonMahasiswa', 'no'));
     }
 
     public function detail($id)
     {
         $riwayat = PeminjamanFasilitas::with(['user', 'fasilitas', 'approvedBy'])->findOrFail($id);
-        return view('admin.riwayat.detail', compact('riwayat'));
+        return view('admin.Riwayat.detail', compact('riwayat'));
     }
 
     public function print($id)
     {
         $riwayat = PeminjamanFasilitas::with(['user', 'fasilitas', 'approvedBy'])->findOrFail($id);
-        $pdf = PDF::loadView('admin.riwayat.print', compact('riwayat'));
-        return $pdf->download('riwayat-peminjaman-' . $riwayat->kode_peminjaman . '.pdf');
+        $pdf = PDF::loadView('admin.Riwayat.print', compact('riwayat'));
+        return $pdf->stream('riwayat_peminjaman_' . $riwayat->kode_peminjaman . '.pdf');
     }
 }

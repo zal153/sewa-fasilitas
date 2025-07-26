@@ -2,61 +2,78 @@
 @section('title', 'Form Peminjaman')
 
 @section('contentUser')
-    <div class="px-6 pb-20 pt-6">
-        <div class="flex items-center mb-4 justify-between">
-            <h1 class="inline-block xl:text-xl text-lg font-semibold leading-6">
-                Form Pengajuan Peminjaman
-            </h1>
-        </div>
-        <div class="grid grid-cols gap-6">
-            <div class="xl:col-span-8 col-span-12">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <form action="{{ route('mahasiswa.peminjaman.store') }}" method="POST">
-                            @csrf
-                            <div class="mb-3">
-                                <label class="mb-2 block text-gray-800 font-semibold">Nama</label>
-                                <input type="text" value="{{ auth()->user()->name }}" disabled
-                                    class="text-base border border-gray-300 text-gray-900 rounded-md block w-full p-2 px-3 bg-gray-100" />
-                            </div>
-                            <div class="mb-3">
-                                <label for="fasilitas_id" class="mb-2 block text-gray-800 font-semibold">Pilih
-                                    Fasilitas</label>
-                                <select name="fasilitas_id" id="fasilitas_id" required
-                                    class="text-base border border-gray-300 text-gray-900 rounded-md block w-full p-2 px-3">
-                                    <option value="">-- Pilih Fasilitas --</option>
-                                    @foreach ($fasilitas as $item)
-                                        <option value="{{ $item->id }}">{{ $item->nama_fasilitas }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tanggal_mulai" class="mb-2 block text-gray-800 font-semibold">Tanggal
-                                    Mulai</label>
-                                <input type="datetime-local" name="tanggal_mulai" id="tanggal_mulai" required
-                                    class="text-base border border-gray-300 text-gray-900 rounded-md block w-full p-2 px-3" />
-                            </div>
-                            <div class="mb-3">
-                                <label for="tanggal_selesai" class="mb-2 block text-gray-800 font-semibold">Tanggal
-                                    Selesai</label>
-                                <input type="datetime-local" name="tanggal_selesai" id="tanggal_selesai" required
-                                    class="text-base border border-gray-300 text-gray-900 rounded-md block w-full p-2 px-3" />
-                            </div>
-                            <div class="mb-3">
-                                <label for="keperluan" class="mb-2 block text-gray-800 font-semibold">Keperluan</label>
-                                <textarea name="keperluan" id="keperluan" rows="4" required
-                                    class="text-base border border-gray-300 text-gray-900 rounded-md block w-full p-2 px-3"></textarea>
-                            </div>
+<div class="container-xxl flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4">
+        <span class="text-muted fw-light">Peminjaman /</span> Form Pengajuan
+    </h4>
 
-                            <button type="submit"
-                                class="btn gap-x-2 bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-800">Ajukan</button>
-                            <a href="{{ route('mahasiswa.peminjaman') }}"
-                                class="btn gap-x-2 bg-red-600 text-white border-red-600 hover:bg-red-700">Kembali</a>
-                        </form>
+    <div class="row">
+        <div class="col-xxl">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Form Pengajuan Peminjaman</h5>
+                    <small class="text-muted float-end">Isi dengan lengkap</small>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('mahasiswa.peminjaman.store') }}">
+                        @csrf
 
-                    </div>
+                        <!-- Nama -->
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label">Nama</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control bg-light" value="{{ auth()->user()->name }}" disabled>
+                            </div>
+                        </div>
+
+                        <!-- Fasilitas -->
+                        <div class="row mb-3">
+                            <label class="col-sm-2 col-form-label">Fasilitas</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control bg-light" value="{{ $fasilitas_pilih->nama_fasilitas }}" disabled>
+                                <input type="hidden" name="fasilitas_id" value="{{ $fasilitas_pilih->id }}">
+                            </div>
+                        </div>
+
+                        <!-- Tanggal Mulai -->
+                        <div class="row mb-3">
+                            <label for="tanggal_mulai" class="col-sm-2 col-form-label">Tanggal Mulai</label>
+                            <div class="col-sm-10">
+                                <input type="datetime-local" id="tanggal_mulai" name="tanggal_mulai" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <!-- Tanggal Selesai -->
+                        <div class="row mb-3">
+                            <label for="tanggal_selesai" class="col-sm-2 col-form-label">Tanggal Selesai</label>
+                            <div class="col-sm-10">
+                                <input type="datetime-local" id="tanggal_selesai" name="tanggal_selesai" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <!-- Keperluan -->
+                        <div class="row mb-3">
+                            <label for="keperluan" class="col-sm-2 col-form-label">Keperluan</label>
+                            <div class="col-sm-10">
+                                <textarea name="keperluan" id="keperluan" rows="4" class="form-control" placeholder="Tuliskan keperluan peminjaman..." required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Aksi -->
+                        <div class="row justify-content-end">
+                            <div class="col-sm-10 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bx bx-send"></i> Ajukan
+                                </button>
+                                <a href="{{ route('mahasiswa.peminjaman') }}" class="btn btn-danger">
+                                    <i class="bx bx-arrow-back"></i> Kembali
+                                </a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 @endsection

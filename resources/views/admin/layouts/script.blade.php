@@ -1,13 +1,31 @@
-<script data-cfasync="false" src="../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-<script src="{{ asset('') }}assets/js/vendor/jquery.min.js"></script>
-<script src="{{ asset('') }}assets/js/vendor/apexcharts.min.js"></script>
-<script src="{{ asset('') }}assets/js/vendor/flowbite.min.js"></script>
-<script src="{{ asset('') }}assets/js/vendor/smooth-scrollbar/smooth-scrollbar.min.js"></script>
-<script src="{{ asset('') }}assets/js/pages/dashboard-lms.js"></script>
-<script src="{{ asset('') }}assets/js/component/app-menu-bar.js"></script>
-<script src="{{ asset('') }}assets/js/component/tab.js"></script>
-<script src="{{ asset('') }}assets/js/switcher.js"></script>
-<script src="{{ asset('') }}assets/js/layout.js"></script>
-<script src="{{ asset('') }}assets/js/main.js"></script>
-<script src="{{ asset('') }}assets/js/vendor/select/select2.min.js"></script>
-<script src="{{ asset('') }}assets/js/pages/dashboard-logistic.js"></script>
+<!-- jQuery -->
+<script src="{{ asset('') }}assets/plugins/jquery/jquery.min.js"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="{{ asset('') }}assets/plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+    $.widget.bridge("uibutton", $.ui.button);
+</script>
+<!-- Bootstrap 4 -->
+<script src="{{ asset('') }}assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- ChartJS -->
+<script src="{{ asset('') }}assets/plugins/chart.js/Chart.min.js"></script>
+<!-- Sparkline -->
+<script src="{{ asset('') }}assets/plugins/sparklines/sparkline.js"></script>
+<!-- JQVMap -->
+<script src="{{ asset('') }}assets/plugins/jqvmap/jquery.vmap.min.js"></script>
+<script src="{{ asset('') }}assets/plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+<!-- jQuery Knob Chart -->
+<script src="{{ asset('') }}assets/plugins/jquery-knob/jquery.knob.min.js"></script>
+<!-- daterangepicker -->
+<script src="{{ asset('') }}assets/plugins/moment/moment.min.js"></script>
+<script src="{{ asset('') }}assets/plugins/daterangepicker/daterangepicker.js"></script>
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="{{ asset('') }}assets/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- Summernote -->
+<script src="{{ asset('') }}assets/plugins/summernote/summernote-bs4.min.js"></script>
+<!-- overlayScrollbars -->
+<script src="{{ asset('') }}assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+<!-- AdminLTE App -->
+<script src="{{ asset('') }}assets/js/adminlte.js"></script>
+

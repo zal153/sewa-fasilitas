@@ -1,236 +1,456 @@
 @extends('admin.layouts.admin')
 @section('title', 'Data Peminjaman')
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4@5.0.15/bootstrap-4.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+@endpush
+
 @section('contentAdmin')
-    <div
-        class="main-content group-data-[sidebar-size=lg]:xl:ml-[calc(theme('spacing.app-menu')_+_16px)] group-data-[sidebar-size=sm]:xl:ml-[calc(theme('spacing.app-menu-sm')_+_16px)] group-data-[theme-width=box]:xl:px-0 px-3 xl:px-4 ac-transition">
-        {{-- content --}}
-        <div class="grid grid-cols-12">
-            <div class="col-span-full">
-                <div class="card p-0">
-                    <div class="p-6">
-                        <div class="flex-center-between">
-                            <div class="flex items-center gap-5">
-                                <form class="max-w-80 relative">
-                                    <span class="absolute top-1/2 -translate-y-[40%] left-2.5">
-                                        <i class="ri-search-line text-gray-900 dark:text-dark-text text-[14px]"></i>
-                                    </span>
-                                    <input type="text" placeholder="Search for..." class="form-input pl-[30px]">
-                                </form>
-                                <button type="button"
-                                    class="font-spline_sans text-sm px-1 text-gray-900 dark:text-dark-text flex-center gap-1.5"
-                                    onclick="window.location.href=window.location.href">
-                                    <i class="ri-loop-right-line text-inherit text-sm"></i>
-                                    <span>Refresh Data</span>
-                                </button>
-                            </div>
-                            <a href="{{ route('peminjaman.create') }}"
-                                class="btn b-light btn-primary-light dk-theme-card-square">
-                                <i class="ri-add-fill text-inherit"></i>
-                                <span>Tambah Data</span>
-                            </a>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1><i class="fas fa-history"></i> Data Peminjaman</h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                            <li class="breadcrumb-item active">Data Peminjaman</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <!-- Filter & Search Card -->
+                <div class="card card-outline card-primary collapsed-card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-filter"></i> Filter & Pencarian</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-plus"></i>
+                            </button>
                         </div>
-                        <div class="overflow-x-auto mt-5">
-                            <table
-                                class="table-auto border-collapse w-full whitespace-nowrap text-left text-gray-500 dark:text-dark-text font-medium">
-                                <thead>
+                    </div>
+                    <div class="card-body">
+                        <form id="filterForm" method="GET">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <select name="status" class="form-control select2" id="filterStatus">
+                                            <option value="">Semua Status</option>
+                                            <option value="Menunggu"
+                                                {{ request('status') == 'Menunggu' ? 'selected' : '' }}>Menunggu</option>
+                                            <option value="Diproses"
+                                                {{ request('status') == 'Diproses' ? 'selected' : '' }}>Diproses</option>
+                                            <option value="Disetujui"
+                                                {{ request('status') == 'Disetujui' ? 'selected' : '' }}>Disetujui</option>
+                                            <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>
+                                                Ditolak</option>
+                                            <option value="Batal" {{ request('status') == 'Batal' ? 'selected' : '' }}>
+                                                Batal</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Tanggal Mulai</label>
+                                        <input type="date" name="tanggal_mulai" class="form-control"
+                                            value="{{ request('tanggal_mulai') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Tanggal Selesai</label>
+                                        <input type="date" name="tanggal_selesai" class="form-control"
+                                            value="{{ request('tanggal_selesai') }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <div class="d-flex">
+                                            <button type="submit" class="btn btn-primary mr-2">
+                                                <i class="fas fa-search"></i> Filter
+                                            </button>
+                                            <a href="{{ route('riwayat') }}" class="btn btn-secondary">
+                                                <i class="fas fa-undo"></i> Reset
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-3">
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3>{{ $stats['total'] ?? 0 }}</h3>
+                                <p>Total Peminjaman</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-clipboard-list"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-warning">
+                            <div class="inner">
+                                <h3>{{ $stats['menunggu'] ?? 0 }}</h3>
+                                <p>Menunggu Persetujuan</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-success">
+                            <div class="inner">
+                                <h3>{{ $stats['disetujui'] ?? 0 }}</h3>
+                                <p>Disetujui</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-danger">
+                            <div class="inner">
+                                <h3>{{ $stats['ditolak'] ?? 0 }}</h3>
+                                <p>Ditolak</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-times-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Data Table -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-table"></i> Daftar Peminjaman</h3>
+                        <div class="card-tools">
+                            {{-- <div class="btn-group">
+                                <button type="button" class="btn btn-tool dropdown-toggle" data-toggle="dropdown">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="{{ route('riwayat.export', 'excel') }}">
+                                        <i class="fas fa-file-excel text-success"></i> Excel
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('riwayat.export', 'pdf') }}">
+                                        <i class="fas fa-file-pdf text-danger"></i> PDF
+                                    </a>
+                                </div>
+                            </div> --}}
+                            <button type="button" class="btn btn-tool" onclick="location.reload()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="peminjamanTable" class="table table-bordered table-striped table-hover">
+                                <thead class="thead-dark">
                                     <tr>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">No.
-                                        </th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Kode
-                                            Peminjaman
-                                        </th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Nama Peminjam
-                                        </th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Fasilitas yang
-                                            Dipinjam
-                                        </th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Tanggal Mulai
-                                        </th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Tanggal
-                                            Selesai</th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">keperluan</th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Status</th>
+                                        <th width="5%">No.</th>
+                                        <th>Kode</th>
+                                        <th>Peminjam</th>
+                                        <th>Fasilitas</th>
+                                        <th>Waktu Peminjaman</th>
+                                        <th>Keperluan</th>
+                                        <th>Status</th>
                                         @if ($adaNonMahasiswa)
-                                            <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Biaya</th>
-                                            <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">
-                                                Pembayaran
-                                            </th>
+                                            <th>Pembayaran</th>
                                         @endif
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Disetujui Oleh
-                                        </th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one">Catatan</th>
-                                        <th class="p-6 py-4 bg-[#F2F4F9] dark:bg-dark-card-two dk-border-one w-10">Action
-                                        </th>
+                                        <th>Disetujui</th>
+                                        <th width="12%">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-dark-border-three">
+                                <tbody>
                                     @forelse ($riwayat as $item)
                                         <tr>
-                                            <td class="p-6 py-4 dk-border-one">{{ $no++ }}</td>
-                                            <td class="p-6 py-4 dk-border-one">{{ $item->kode_peminjaman }}</td>
-                                            <td class="p-6 py-4 dk-border-one">{{ $item->user->name ?? '_' }}</td>
-                                            <td class="p-6 py-4 dk-border-one">{{ $item->fasilitas->nama_fasilitas ?? '_' }}
+                                            <td>{{ $no++ }}</td>
+                                            <td>
+                                                <span
+                                                    class="badge badge-outline-primary">{{ $item->kode_peminjaman }}</span>
                                             </td>
-                                            <td class="p-6 py-4 dk-border-one">
-                                                {{ $item->tanggal_mulai->format('d M Y H:i') }}</td>
-                                            <td class="p-6 py-4 dk-border-one">
-                                                {{ $item->tanggal_selesai->format('d M Y H:i') }}</td>
-                                            <td class="p-6 py-4 dk-border-one">{{ $item->keperluan }}</td>
-                                            <td class="p-6 py-4 dk-border-one">
+                                            <td>
+                                                <div class="user-panel d-flex">
+                                                    <div class="image">
+                                                        <img src="{{ $item->user->avatar ?? asset('dist/img/user2-160x160.jpg') }}"
+                                                            class="img-circle elevation-2" alt="User Image"
+                                                            style="width: 25px; height: 25px;">
+                                                    </div>
+                                                    <div class="info">
+                                                        <span>{{ $item->user->name ?? '-' }}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-building text-primary"></i>
+                                                {{ $item->fasilitas->nama_fasilitas ?? '-' }}
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-calendar-alt"></i>
+                                                    {{ $item->tanggal_mulai->format('d/m/Y H:i') }}<br>
+                                                    <i class="fas fa-arrow-right"></i>
+                                                    {{ $item->tanggal_selesai->format('d/m/Y H:i') }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <span class="text-truncate d-inline-block" style="max-width: 150px;"
+                                                    title="{{ $item->keperluan }}">
+                                                    {{ $item->keperluan }}
+                                                </span>
+                                            </td>
+                                            <td>
                                                 @php
                                                     $status = $item->status ?? 'Menunggu';
-
                                                     $badgeClass = match ($status) {
-                                                        'Diproses' => 'badge-warning-light',
-                                                        'Disetujui' => 'badge-success-light',
-                                                        'Ditolak' => 'badge-danger-light',
-                                                        'Menunggu' => 'badge-info-light',
-                                                        'Batal' => 'badge-disable-light',
-                                                        default => 'badge-info-light',
+                                                        'Diproses' => 'badge badge-warning',
+                                                        'Disetujui' => 'badge badge-success',
+                                                        'Ditolak' => 'badge badge-danger',
+                                                        'Menunggu' => 'badge badge-info',
+                                                        'Batal' => 'badge badge-secondary',
+                                                        default => 'badge badge-info',
                                                     };
                                                 @endphp
-
-                                                <span class="badge {{ $badgeClass }} rounded-full">
+                                                <span class="{{ $badgeClass }}">
+                                                    <i class="fas fa-circle mr-1" style="font-size: 8px;"></i>
                                                     {{ ucfirst($status) }}
                                                 </span>
                                             </td>
                                             @if ($adaNonMahasiswa)
-                                                <td class="p-6 py-4 dk-border-one">
+                                                <td>
                                                     <span
-                                                        class="{{ $item->is_aktif ? 'badge badge-danger-light rounded-full' : 'badge badge-success-light rounded-full' }}">
+                                                        class="badge {{ $item->is_aktif ? 'badge-danger' : 'badge-success' }}">
+                                                        <i
+                                                            class="fas {{ $item->is_aktif ? 'fa-times' : 'fa-check' }} mr-1"></i>
                                                         {{ $item->is_aktif ? 'Belum Bayar' : 'Sudah Bayar' }}
                                                     </span>
                                                 </td>
                                             @endif
-                                            <td class="p-6 py-4 dk-border-one">{{ $item->approvedBy->name ?? '-' }}</td>
-                                            <td class="p-6 py-4 dk-border-one">{{ $item->catatan }}</td>
-                                            <td class="p-6 py-4 dk-border-one">
-                                                <div class="flex items-center gap-2">
-                                                    <!-- VIEW ICON -->
-                                                    <button onclick="showDetail({{ $item->id }})"
-                                                        class="btn-icon btn-info-icon-light size-7">
-                                                        <i class="ri-eye-line text-inherit text-[13px]"></i>
+                                            <td>
+                                                @if ($item->approvedBy)
+                                                    <small class="text-success">
+                                                        <i class="fas fa-user-check"></i>
+                                                        {{ $item->approvedBy->name }}
+                                                    </small>
+                                                @else
+                                                    <small class="text-muted">-</small>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button type="button" class="btn btn-info btn-detail"
+                                                        data-id="{{ $item->id }}" title="Detail">
+                                                        <i class="fas fa-eye"></i>
                                                     </button>
-
-                                                    <!-- PRINT ICON -->
                                                     <a href="{{ route('riwayat.print', $item->id) }}" target="_blank"
-                                                        class="btn-icon btn-warning-icon-light size-7">
-                                                        <i class="ri-printer-line text-inherit text-[13px]"></i>
+                                                        class="btn btn-warning" title="Print">
+                                                        <i class="fas fa-print"></i>
                                                     </a>
-
-                                                    <!-- DELETE ICON -->
-                                                    <form action="{{ route('peminjaman.destroy', $item->id) }}"
-                                                        method="POST" onsubmit="return confirm('Yakin ingin menghapus?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="btn-icon btn-danger-icon-light size-7">
-                                                            <i class="ri-delete-bin-line text-inherit text-[13px]"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-danger btn-delete"
+                                                        data-id="{{ $item->id }}"
+                                                        data-kode="{{ $item->kode_peminjaman }}" title="Hapus">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
-                                        <div id="modal-detail" class="fixed inset-0 bg-black/50 z-60 hidden">
-                                            <div
-                                                class="bg-white rounded-lg shadow-lg w-full max-w-2xl mx-auto mt-20 p-6 relative">
-                                                <div id="detail-container">Loading...</div>
-                                            </div>
-                                        </div>
                                     @empty
                                         <tr>
-                                            <td colspan="13" class="p-6 py-4 text-center text-gray-400">Belum ada data
-                                                peminjaman 😴</td>
+                                            <td colspan="{{ $adaNonMahasiswa ? '10' : '9' }}"
+                                                class="text-center text-muted py-4">
+                                                <i class="fas fa-inbox fa-3x mb-3"></i><br>
+                                                <h5>Belum ada data peminjaman</h5>
+                                                <p>Data peminjaman akan muncul di sini</p>
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
-                        <!-- START PAGINATION -->
-                        @php
-                            $start = ($data->currentPage() - 1) * $data->perPage() + 1;
-                            $end = min($data->currentPage() * $data->perPage(), $data->total());
-                        @endphp
-
-                        <div class="flex-center-between mt-5">
-                            <div class="font-spline_sans text-sm text-gray-900 dark:text-dark-text">
-                                Showing {{ $start }} to {{ $end }} of {{ $data->total() }} entries
-                            </div>
-                            <nav class="dk-border-one rounded-[4px] overflow-hidden">
-                                <ul class="divide-x divide-gray-200 dark:divide-dark-border-three flex items-center">
-                                    {{-- Previous --}}
-                                    @if ($data->onFirstPage())
-                                        <li><span
-                                                class="font-spline_sans size-8 flex-center text-gray-400 cursor-not-allowed">‹</span>
-                                        </li>
-                                    @else
-                                        <li><a href="{{ $data->previousPageUrl() }}"
-                                                class="font-spline_sans size-8 flex-center text-gray-900 hover:text-primary-500">‹</a>
-                                        </li>
-                                    @endif
-
-                                    {{-- Page Numbers --}}
-                                    @foreach ($data->getUrlRange(1, $data->lastPage()) as $page => $url)
-                                        <li>
-                                            <a href="{{ $url }}"
-                                                class="font-spline_sans font-medium flex-center size-8 text-gray-900 dark:text-dark-text bg-white dark:bg-dark-icon hover:text-primary-500 {{ $data->currentPage() == $page ? 'bg-primary-500 text-white' : '' }}">
-                                                {{ $page }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-
-                                    {{-- Next --}}
-                                    @if ($data->hasMorePages())
-                                        <li><a href="{{ $data->nextPageUrl() }}"
-                                                class="font-spline_sans size-8 flex-center text-gray-900 hover:text-primary-500">›</a>
-                                        </li>
-                                    @else
-                                        <li><span
-                                                class="font-spline_sans size-8 flex-center text-gray-400 cursor-not-allowed">›</span>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </nav>
-                        </div>
-
                     </div>
 
+                    @if (method_exists($riwayat, 'hasPages') && $riwayat->hasPages())
+                        <div class="card-footer">
+                            <div class="row align-items-center">
+                                <div class="col-sm-6">
+                                    @php
+                                        $start = ($riwayat->currentPage() - 1) * $riwayat->perPage() + 1;
+                                        $end = min($riwayat->currentPage() * $riwayat->perPage(), $riwayat->total());
+                                    @endphp
+                                    <small class="text-muted">
+                                        Menampilkan {{ $start }} sampai {{ $end }} dari
+                                        {{ $riwayat->total() }} data
+                                    </small>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="float-right">
+                                        {{ $riwayat->links('pagination::bootstrap-4') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @elseif(method_exists($riwayat, 'count'))
+                        <div class="card-footer">
+                            <div class="row align-items-center">
+                                <div class="col-sm-12">
+                                    <small class="text-muted">
+                                        Total {{ $riwayat->count() }} data peminjaman
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal Detail -->
+    <div class="modal fade" id="modalDetail" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h4 class="modal-title">
+                        <i class="fas fa-info-circle"></i> Detail Peminjaman
+                    </h4>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalDetailContent">
+                    <div class="text-center">
+                        <i class="fas fa-spinner fa-spin fa-2x"></i>
+                        <p>Memuat data...</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+@endsection
+
+@push('scripts')
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Toastr -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
     <script>
-        function showDetail(id) {
-            console.log("Menampilkan detail untuk ID:", id);
-            $.ajax({
-                url: '/admin/riwayat/detail/' + id,
-                method: 'GET',
-                success: function(response) {
-                    const modalContent = `
-                <div class="relative bg-white dark:bg-dark-card rounded-lg shadow info-border-left">
-                    <button type="button" class="flex-center absolute top-3 end-2.5 hover:bg-gray-200 dark:hover:bg-dark-icon rounded-lg size-8 close-button">
-                        <i class="ri-close-line text-gray-500 dark:text-dark-text text-xl"></i>
-                    </button>
-                    <div class="p-4 md:py-7 flex-center flex-col text-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none">
-                            <path d="M23.3333 29C23.3333 29.3978 23.1752 29.7794 22.8939 30.0607C22.6126 30.342 22.2311 30.5 21.8333 30.5C21.0376 30.5 20.2745 30.1839 19.7119 29.6213C19.1493 29.0587 18.8333 28.2956 18.8333 27.5V20C18.4354 20 18.0539 19.842 17.7726 19.5607C17.4913 19.2794 17.3333 18.8978 17.3333 18.5C17.3333 18.1022 17.4913 17.7206 17.7726 17.4393C18.0539 17.158 18.4354 17 18.8333 17C19.6289 17 20.392 17.3161 20.9546 17.8787C21.5172 18.4413 21.8333 19.2044 21.8333 20V27.5C22.2311 27.5 22.6126 27.658 22.8939 27.9393C23.1752 28.2206 23.3333 28.6022 23.3333 29ZM39.8333 20C39.8333 23.8567 38.6896 27.6269 36.5469 30.8336C34.4042 34.0404 31.3587 36.5397 27.7956 38.0156C24.2324 39.4916 20.3116 39.8777 16.529 39.1253C12.7464 38.3729 9.2718 36.5157 6.54468 33.7886C3.81755 31.0615 1.96036 27.5869 1.20795 23.8043C0.455536 20.0216 0.841701 16.1008 2.31761 12.5377C3.79352 8.97451 6.29288 5.92903 9.49964 3.78634C12.7064 1.64366 16.4765 0.5 20.3333 0.5C25.5033 0.50546 30.46 2.56167 34.1158 6.21745C37.7716 9.87322 39.8278 14.83 39.8333 20ZM36.8333 20C36.8333 16.7366 35.8656 13.5465 34.0525 10.8331C32.2395 8.11968 29.6625 6.00483 26.6475 4.75599C23.6326 3.50714 20.315 3.18039 17.1143 3.81704C13.9136 4.4537 10.9736 6.02517 8.666 8.33274C6.35843 10.6403 4.78696 13.5803 4.1503 16.781C3.51365 19.9817 3.8404 23.2993 5.08925 26.3143C6.33809 29.3293 8.45294 31.9062 11.1664 33.7192C13.8798 35.5323 17.0699 36.5 20.3333 36.5C24.7078 36.495 28.9018 34.7551 31.995 31.6618C35.0883 28.5685 36.8283 24.3745 36.8333 20ZM19.5833 14C20.0283 14 20.4633 13.868 20.8333 13.6208C21.2033 13.3736 21.4917 13.0222 21.662 12.611C21.8323 12.1999 21.8768 11.7475 21.79 11.311C21.7032 10.8746 21.4889 10.4737 21.1742 10.159C20.8596 9.84434 20.4587 9.63005 20.0222 9.54323C19.5858 9.45642 19.1334 9.50097 18.7222 9.67127C18.3111 9.84157 17.9597 10.13 17.7125 10.5C17.4652 10.87 17.3333 11.305 17.3333 11.75C17.3333 12.3467 17.5703 12.919 17.9923 13.341C18.4142 13.7629 18.9865 14 19.5833 14Z" fill="#498CFF"/>
-                        </svg>
-                        <h3 class="card-title text-2xl mt-3">Information</h3>
-                        <p class="text-gray-500 dark:text-dark-text font-medium px-[5%] mt-1.5">
-                            ${response}
-                        </p>
-                    </div>
-                </div>
-            `;
-                    // Menampilkan modal di container
-                    $('#modal-detail').html(modalContent);
-                    $('#modal-detail').removeClass('hidden');
-                },
-                error: function(xhr) {
-                    alert('Gagal mengambil data.');
-                }
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#peminjamanTable').DataTable({
+                responsive: true,
+                lengthChange: false,
+                autoWidth: false,
+                searching: false,
+                paging: false,
+                info: false,
+                order: [
+                    [0, 'desc']
+                ]
             });
-        }
+
+            // Detail Modal
+            $('.btn-detail').click(function() {
+                const id = $(this).data('id');
+
+                $('#modalDetail').modal('show');
+                $('#modalDetailContent').html(`
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Memuat data...</p>
+            </div>
+        `);
+
+                $.get(`{{ route('riwayat.detail', ':id') }}/${id}`)
+                    .done(function(data) {
+                        $('#modalDetailContent').html(data);
+                    })
+                    .fail(function() {
+                        $('#modalDetailContent').html(`
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        <p>Gagal memuat data</p>
+                    </div>
+                `);
+                    });
+            });
+
+            // Delete Confirmation
+            $('.btn-delete').click(function() {
+                const id = $(this).data('id');
+                const kode = $(this).data('kode');
+
+                Swal.fire({
+                    title: 'Konfirmasi Hapus',
+                    text: `Yakin ingin menghapus peminjaman ${kode}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-trash"></i> Ya, Hapus!',
+                    cancelButtonText: '<i class="fas fa-times"></i> Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Create and submit form
+                        const form = $(`
+                    <form action="{{ route('peminjaman.destroy', ':id') }}/${id}" method="POST">
+                        @csrf
+                        @extends('admin.layouts.admin')
+                    </form>
+                `);
+                        $('body').append(form);
+                        form.submit();
+                    }
+                });
+            });
+
+            // Toastr Configuration
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "3000"
+            };
+
+            // Show success message if exists
+            @if (session('success'))
+                toastr.success('{{ session('success') }}');
+            @endif
+
+            // Show error message if exists
+            @if (session('error'))
+                toastr.error('{{ session('error') }}');
+            @endif
+        });
     </script>
-@endsection
+@endpush

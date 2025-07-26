@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Fasilitas;
 use App\Models\PeminjamanFasilitas;
+use App\Models\User;
+use App\Notifications\PengembalianBarangNotification;
+use App\Notifications\StatusPeminjamanNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,7 +22,7 @@ class PeminjamanController extends Controller
         $peminjaman = PeminjamanFasilitas::all();
         $adaNonMahasiswa = $peminjaman->contains(fn($item) => $item->user->role === 'non-mahasiswa');
         $no = 1;
-        return view('admin.peminjaman.index', compact('user', 'fasilitas', 'peminjaman', 'no', 'data', 'adaNonMahasiswa'));
+        return view('admin.Peminjaman.index', compact('user', 'fasilitas', 'peminjaman', 'no', 'data', 'adaNonMahasiswa'));
     }
 
     public function store(Request $request)
@@ -32,15 +35,21 @@ class PeminjamanController extends Controller
             'keperluan' => 'required|string',
         ]);
 
-        PeminjamanFasilitas::create([
+        $peminjaman = PeminjamanFasilitas::create([
             'user_id' => $request->user_id,
             'fasilitas_id' => $request->fasilitas_id,
             'tanggal_mulai' => $request->tanggal_mulai,
             'tanggal_selesai' => $request->tanggal_selesai,
             'keperluan' => $request->keperluan,
-            'status' => 'Menunggu',
-            'status_pembayaran' => 0, // 0 = Belum Bayar
+            'status' => 'diajukan',
+            'status_pembayaran' => 0,
         ]);
+
+        // Kirim notifikasi ke admin
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new StatusPeminjamanNotification($peminjaman, 'diajukan'));
+        }
 
         return redirect()->route('peminjaman')->with('success', 'Data berhasil ditambahkan.');
     }
@@ -51,27 +60,46 @@ class PeminjamanController extends Controller
         $users = User::all();
         $fasilitas = Fasilitas::all();
 
-        return view('admin.peminjaman.edit', compact('peminjaman', 'users', 'fasilitas'));
+        return view('admin.Peminjaman.edit', compact('peminjaman', 'users', 'fasilitas'));
     }
-
 
     public function update(Request $request, string $id)
     {
         $request->validate([
             'status' => 'nullable|in:diajukan,disetujui,ditolak,selesai',
-            // 'status_pembayaran' => 'nullable|boolean',
             'catatan' => 'nullable|string',
         ]);
 
         $peminjaman = PeminjamanFasilitas::findOrFail($id);
+        $oldStatus = $peminjaman->status;
+
         $peminjaman->status = $request->status ?? $peminjaman->status;
         $peminjaman->catatan = $request->catatan;
 
         if ($request->status === 'disetujui') {
             $peminjaman->approved_by = Auth::id();
+            $this->setFasilitasAktif($peminjaman->fasilitas_id, true);
+        }
+
+        if ($request->status === 'selesai') {
+            $this->setFasilitasAktif($peminjaman->fasilitas_id, false);
+
+            // Kirim notifikasi pengembalian barang
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new PengembalianBarangNotification($peminjaman));
+            }
         }
 
         $peminjaman->save();
+
+        // Kirim notifikasi jika status berubah
+        if ($oldStatus !== $request->status && $request->status) {
+            $admins = User::where('role', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new StatusPeminjamanNotification($peminjaman, $request->status));
+            }
+        }
 
         return redirect()->route('peminjaman')->with('success', 'Data berhasil diperbarui.');
     }
@@ -84,14 +112,60 @@ class PeminjamanController extends Controller
         return redirect()->route('peminjaman')->with('success', 'Data berhasil dihapus.');
     }
 
-    // Custom method buat menyetujui
+    public function reject($id)
+    {
+        $peminjaman = PeminjamanFasilitas::findOrFail($id);
+        $peminjaman->status = 'Ditolak';
+        $peminjaman->save();
+
+        // Kirim notifikasi
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new StatusPeminjamanNotification($peminjaman, 'ditolak'));
+        }
+
+        return redirect()->back()->with('success', 'Peminjaman telah ditolak.');
+    }
+
     public function approve($id)
     {
         $peminjaman = PeminjamanFasilitas::findOrFail($id);
         $peminjaman->status = 'Disetujui';
-        $peminjaman->approved_by = Auth::id();
+        $peminjaman->disetujui_oleh = Auth::id();
         $peminjaman->save();
 
-        return redirect()->back()->with('success', 'Peminjaman telah disetujui.');
+        $this->setFasilitasAktif($peminjaman->fasilitas_id, true);
+
+        // Kirim notifikasi
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new StatusPeminjamanNotification($peminjaman, 'disetujui'));
+        }
+
+        return redirect()->back()->with('success', 'Peminjaman telah disetujui dan fasilitas ditandai sebagai digunakan.');
+    }
+
+    private function setFasilitasAktif($fasilitasId, $aktif = true)
+    {
+        $fasilitas = Fasilitas::find($fasilitasId);
+        if ($fasilitas) {
+            // Jika peminjaman selesai, cek apakah masih ada peminjaman aktif lainnya
+            if (!$aktif) {
+                $masihAdaPeminjamanAktif = PeminjamanFasilitas::where('fasilitas_id', $fasilitasId)
+                    ->where('status', 'disetujui')
+                    ->where('tanggal_mulai', '<=', Carbon::now())
+                    ->where('tanggal_selesai', '>=', Carbon::now())
+                    ->exists();
+
+                // Hanya set tidak aktif jika tidak ada peminjaman aktif lainnya
+                if (!$masihAdaPeminjamanAktif) {
+                    $fasilitas->is_aktif = 0;
+                }
+            } else {
+                $fasilitas->is_aktif = 1;
+            }
+
+            $fasilitas->save();
+        }
     }
 }

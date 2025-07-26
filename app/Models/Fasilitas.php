@@ -12,19 +12,34 @@ class Fasilitas extends Model
     protected $table = 'fasilitas';
     protected $primaryKey = 'id';
     public $timestamps = false;
-    
+
     protected $fillable = [
         'nama_fasilitas',
         'deskripsi',
         'lokasi',
         'kapasitas',
         'gambar',
-        'is_aktif',
+        'status_penggunaan',
+        'biaya',
     ];
 
-    protected $casts = [
-        'is_aktif' => 'boolean',
-    ];
+    // protected $casts = [
+    //     'is_aktif' => 'boolean',
+    // ];
+
+    public function sedangDisewakan()
+    {
+        return $this->peminjamanFasilitas()
+            ->where('status', 'disetujui')
+            ->where('tanggal_mulai', '<=', now())
+            ->where('tanggal_selesai', '>=', now())
+            ->exists();
+    }
+
+    public function tersedia()
+    {
+        return !$this->sedangDisewakan();
+    }
 
     public function jadwalFasilitas()
     {
